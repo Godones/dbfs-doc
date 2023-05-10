@@ -452,13 +452,13 @@ pjdfstest的项目地址与编译流程位于[pjdfstest](https://github.com/pjd/
 | mknod           | mknod                     | 186/186   | :x:       | :heavy_check_mark:       |
 | open            | open/chmod/unlink/symlink | 328/328   | :x:       | :heavy_check_mark:       |
 | posix_fallocate | fallocate                 | 21/22     | 1/22      | Access判断错误           |
-| rename          | rename/mkdir/             | 3239/4857 | 1618/4857 | 错误返回值处理与逻辑错误 |
+| rename          | rename/mkdir/             | 4458/4857 | 399/4857  | 错误返回值处理与逻辑错误 |
 | rmdir           | rmdir                     | 139/145   | 6/145     | 错误处理，权限检查       |
 | symlink         | symlink                   | 95/95     | :x:       | :heavy_check_mark:       |
 | truncate        | truncate                  | 84/84     | :x:       | :heavy_check_mark:       |
 | unlink          | unlink/link               | 403/440   | 37/440    | mknod中的socket,错误处理 |
 | utimensat       | utimens                   | 121/122   | 1/122     | 权限检查                 |
-|                 |                           | 6724/8674 | 1950/8674 | 77%                      |
+|                 |                           | 7943/8674 | 731/8674  | 92%                      |
 
 
 
@@ -694,13 +694,13 @@ pub const SLICE_SIZE:usize = 8192;
 
 
 
-## 改进后的测试
+## 改进测试
 
 上文中我们已经提出了三个当前可行的解决方案，因此，在本节中我们会对这些改进方法进行测试，检查这些改进是否会真正地提升性能。具体而言，我们对每一个改进依次运行mdtest测试，fio的读写测试。
 
 ### mdtest测试
 
-![mdtest-opt](assert/mdtest-opt-1683130519095-2.svg)
+![mdtest-opt](assert/mdtest-opt-1683162685692-11.svg)
 
 解析： 从图中可以看到，没有优化的原始实现与优化后的实现差距很大，有的操作达到了数十倍的性能提升。
 
@@ -717,6 +717,21 @@ pub const SLICE_SIZE:usize = 8192;
 
 
 ### fio-rand-read
+
+
+
+
+
+## 改进后的最终测试
+
+### mdtest
+
+![mdtest](assert/mdtest.svg)
+
+
+
+- ==纵坐标百分比  归一化==
+- ==图改进==
 
 
 
