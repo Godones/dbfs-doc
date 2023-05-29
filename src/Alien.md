@@ -1,109 +1,12 @@
 # Alien
 
-A simple operating system implemented in rust. The purpose is to explore how to use modules to build a complete os,
-so the system is composed of a series of independent modules. At present, the system already supports user-mode programs and some simple functions.
+这是一个使用`rust`实现的简单类linux操作系统，其基于qemu模拟器并在未来运行于真实开发板上，支持`riscv64`位平台。这个简单的操作系统源自笔者的操作系统学习，其目的是探索OS模块化，整个内核由多个独立的模块构成。在DBFS移植到linux内核暂时处于不可行状态下，本文进一步完善了此内核并将其作为DBFS移植的目标。
+
+![osstructure.drawio](assert/osstructure.drawio.svg)
 
 
-## Modules
-`pci` ：pci driver to detect devices on the bus
 
-`rtc` ：rtc driver to get time
-
-`page-table `： page table to manage virtual memory
-
-`simple-bitmap`： a simple bitmap to manage frames
-
-`gmanager`: a simple allocator to manage `process`/ `fd` and so on
-
-`rvfs `: a vfs framework like linux, it can support multiple file systems
-
-`fat32-vfs`: a disk file system, it can support fat32
-
-`jammdb `: a key-value database, it can support `dbfs`
-
-`dbfs2 `:  a disk file system, it is based on `jammdb`
-
-`trace_lib `: stack trace library
-
-`preprint ` : a simple print library
-
-`rslab `: slab allocator like linux
-
-`syscall-table `: A tool to automatically collect syscalls
-
-`dbop`: Make database functions available to users as system calls
-
-`plic`: riscv plic driver
-
-`uart`: uart driver, it supports interrupt
-
-Other modules are not listed here, you can find them in the cargo.toml file.
-
-## filesystem syscall support
-Now the os supports the following system calls:
-
-```rust
-pub fn sys_openat(dirfd: isize, path: usize, flag: usize, mode: usize) -> isize
-pub fn sys_close(fd: usize) -> isize
-pub fn sys_read(fd: usize, buf: *mut u8, len: usize) -> isize
-pub fn sys_write(fd: usize, buf: *const u8, len: usize) -> isize
-pub fn sys_getcwd(buf: *mut u8, len: usize) -> isize 
-pub fn sys_chdir(path: *const u8) -> isize
-pub fn sys_mkdir(path: *const u8) -> isize
-pub fn sys_list(path: *const u8) -> isize
-pub fn sys_lseek(fd: usize, offset: isize, whence: usize) -> isize 
-pub fn sys_fstat(fd: usize, stat: *mut u8) -> isize
-pub fn sys_linkat(
-    old_fd: isize,
-    old_name: *const u8,
-    new_fd: isize,
-    new_name: *const u8,
-    flag: usize,
-) -> isize
-pub fn sys_unlinkat(fd: isize, path: *const u8, flag: usize) -> isize
-pub fn sys_symlinkat(old_name: *const u8, new_fd: isize, new_name: *const u8) -> isize
-pub fn sys_readlinkat(fd: isize, path: *const u8, buf: *mut u8, size: usize) -> isize
-pub fn sys_fstateat(dir_fd: isize, path: *const u8, stat: *mut u8, flag: usize) -> isize 
-pub fn sys_fstatfs(fd: isize, buf: *mut u8) -> isize
-pub fn sys_statfs(path: *const u8, statfs: *const u8) -> isize 
-pub fn sys_renameat(
-    old_dirfd: isize,
-    old_path: *const u8,
-    new_dirfd: isize,
-    new_path: *const u8,
-) -> isize
-pub fn sys_mkdirat(dirfd: isize, path: *const u8, flag: usize) -> isize
-pub fn sys_setxattr(
-    path: *const u8,
-    name: *const u8,
-    value: *const u8,
-    size: usize,
-    flag: usize,
-) -> isize
-pub fn sys_getxattr(path: *const u8, name: *const u8, value: *const u8, size: usize) -> isize
-pub fn sys_fgetxattr(fd: usize, name: *const u8, value: *const u8, size: usize) -> isize
-pub fn sys_listxattr(path: *const u8, list: *const u8, size: usize) -> isize
-pub fn sys_flistxattr(fd: usize, list: *const u8, size: usize) -> isize
-pub fn sys_removexattr(path: *const u8, name: *const u8) -> isize
-pub fn sys_fremovexattr(fd: usize, name: *const u8) -> isize
-```
-
-There are some applications in the `app` directory to test the system calls.
-
-
-## TODO
-
-- [ ] Thread/Mutil-core
-- [x] full vfs
-- [x] fat32
-- [x] dbfs
-- [ ] Mutex
-- [x] sleep task queue
-- [x] uart task queue
-- [ ] block driver task queue
-- [x] a simple shell
-- [x] memory management
-- [x] process management
+整个系统的结构如上图所示，目前已经完成的功能包括内存管理，虚存管理，外部设备，中断，进程管理，文件系统，虚拟文件系统等，已经支持数十个系统调用，同时支持rust编写的应用程序和c语言程序。在系统调用接口上，Alien OS遵守linux riscv syscall 调用规范。在各个模块内部，由一个个可重用的内部小模块构成，这些独立的模块有内存管理中的Slab分配器、伙伴系统，有虚拟内存管理的页帧管理器以及页表，有设备驱动里的串口设备，块设备，等等，这些独立的模块不仅可用于Alien OS中，也可以被社区中的其它OS使用。
 
 ## Github
 [Alien OS](https://github.com/Godones/Alien)
